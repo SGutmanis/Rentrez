@@ -18,10 +18,6 @@ Import the Sequences.csv file
 Sequences<- read.csv("./Sequences.csv")
 ```
 
-Create a matrix with the counts of each base pair
-```{r}
-
-```
 
 Print out each sequence
 ```{r}
@@ -86,7 +82,7 @@ for (i in 1:nrow(Sequences)) {
 }
 ```
 
-
+Print a table of GC content for each sequence
 ```{r}
 ncbi_ids <- c("Sequence 1", "Sequence 2", "Sequence 3")
 sequences <- c(Sequences$Sequence)
@@ -119,18 +115,34 @@ gc_content_table
 ![Bacteria](./Bacteria.jfif)
 
 #PART 2
+
+In order to evaluate this mystery sequence I will test its similarity to annotated sequences found in the NCBI database using BLAST.
 ```{r}
 isolate <- "GCCTGATGGAGGGGGATAACTACTGGAAACGGTAGCTAATACCGCATGAC
 CTCGCAAGAGCAAAGTGGGGGACCTTAGGGCCTCACGCCATCGGATGAAC
 CCAGATGGGATTAGCTAGTAGGTGGGGTAATGGCTCACCTAGGCGACGAT
 CCCTAGCTGGTCTGAGAGGATGACCAGCCACACTGGAACTGAGACACGGT
-CCAGACTCCTACGGGAGGCAGCAGTGGGGAATATTGCACAATGGGCGCAA" # make a vector containing the target sequence
+CCAGACTCCTACGGGAGGCAGCAGTGGGGAATATTGCACAATGGGCGCAA" # make a vector containing the target sequence to be used in a BLAST
 ```
-Search for similar sequences using BLAST
+First I will search for similar sequences using BLAST.
 ```{r}
-blast <- blastSequences(paste(isolate), as='data.frame', timeout=40)
+blast <- blastSequences(isolate, as='data.frame', timeout=200, hitListSize = 1) #this function took extremely long to run so I raised the timeout to 200 seconds and lowered the hit list size to 1, since I saw that there are some perfect matches in NCBI which should show up even with a minimal hit list
+```
+I will need to examine the structure of the blast data table to see what the results of the BLAST are.
+```{r}
+str(blast)
+```
+The information contained in the Hsp_Score and Hsp_evalue will inform us as to how well the mystery DNA matches the hits.
+```{r}
+blast$Hsp_score
+blast$Hsp_evalue
+```
+Very high Hsp Scores and very low Hsp e values reflect that these hits match the sequence extremely well. 
+
+I will then check on the identity of the hits that matched so well
+
+```{r}
+blast$Hit_def #check on the identity of the hit sequences
 ```
 
-
-
-
+The mystery DNA sequence matches perfectly with the Yersinia pestis EV76-CN chromosome. Yersinia pestis is the bacteria that is responsible for the plague. In my professional opinion I do believe that due to the strength of the association between this DNA and known sequences from the Yersinia pestis genome, that this finding is a cause for concern, I suggest immediate action be taken to isolate and treat the individual that this DNA was isolated from.
